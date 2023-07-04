@@ -120,7 +120,7 @@ const newPassword= async(req,res)=>{
    
     try{
       const updatedPost = await User.findByIdAndUpdate(id,{password:hashedPassword});
-      res.json({message:"password updated successfully",updatedPost})
+      res.status(2001).json({message:"password updated successfully",updatedPost})
       
 
     }catch(err){
