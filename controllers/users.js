@@ -69,7 +69,7 @@ const forgotPassword = async (req, res) => {
 
     const token = jwt.sign(payload, secret, {expiresIn: '15m'})
 
-    const link = `http://localhost:5000/users/forget-password/${existingUser._id}/${token}`
+    const link = `https://authentication-xs1n.onrender.com/users/forget-password/${existingUser._id}/${token}`
 
       try {
           sendEmail(email,link)
