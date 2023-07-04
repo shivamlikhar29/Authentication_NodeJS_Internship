@@ -5,9 +5,10 @@ require('dotenv').config({path:'./.env'})
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const sendEmail = require("./nodemailer")
+const ejs = require('ejs')
 const routes = require('./routes/routes')
 
-
+app.set('view engine', 'ejs');
 app.use(express.json())
 
 // const users = [] //for storing users information

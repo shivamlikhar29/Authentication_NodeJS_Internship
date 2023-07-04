@@ -60,30 +60,82 @@ const forgotPassword = async (req, res) => {
   const existingUser = await User.findOne({email})
 
     if (existingUser == null) {
-      return res.status(400).send('Cannot find user')
+      res.status(400).send('Cannot find user')
+      return 
     }
-    
-    let newPassword = Math.floor(Math.random() * 9000) + 1000
-    try {
 
-        const hashedPassword = await bcrypt.hash(newPassword.toString(), 10)
+    const secret = process.env.JWT_SECRET + existingUser.password
+    const payload = {email:existingUser.email, id:existingUser._id}
 
-        
-        const updatedPassword = await User.findOneAndUpdate({email}, existingUser.password = hashedPassword, {
-          new: true
-        });
-        res.status(201).json({NewPassword : newPassword})
-        sendEmail(req.body.email,newPassword)
-      } 
-    catch(err) {
-      res.status(500).send()
+    const token = jwt.sign(payload, secret, {expiresIn: '15m'})
+
+    const link = `http://localhost:5000/users/forget-password/${existingUser._id}/${token}`
+
+      try {
+          sendEmail(email,link)
+          res.status(200).json({success: "Email sent successfully",link: link})
+       } 
+        catch(err) {
+           res.status(500).send()
+            console.log(err)
+     }
+}
+
+const updatedPassword = async(req,res)=>{
+    const {id,token} = req.params
+    const user = await User.findById(id)
+    const secret = process.env.JWT_SECRET + user.password
+
+    if (user == null) {
+      res.status(400).send('Cannot find user')
+      return
+    }
+
+    try{
+      const payload = jwt.verify(token, secret)
+      console.log(payload)
+      res.render('reset-password',{email:payload.email})
+
+    }catch(err){
       console.log(err)
+      res.send(err)
     }
 }
+
+const newPassword= async(req,res)=>{
+    const {id} = req.params
+    const {password, password2} = req.body
+
+    const user = await User.findById(id)
+    if(!user){
+      res.status(400).send('Cannot find user')
+            return
+    }
+
+    if(!password == password2){
+      res.status(400).json({message:"password and confirm password are not same"})
+      return
+    }
+      const hashedPassword = await bcrypt.hash(password,12)
+   
+    try{
+      const updatedPost = await User.findByIdAndUpdate(id,{password:hashedPassword});
+      res.json({message:"password updated successfully",updatedPost})
+      
+
+    }catch(err){
+      console.log(err)
+      res.send(err)
+    }
+}
+
+
 
 module.exports = {
   getUsers,
   registerUser,
   loginUser,
-  forgotPassword  
+  forgotPassword,
+  updatedPassword,
+  newPassword
 }

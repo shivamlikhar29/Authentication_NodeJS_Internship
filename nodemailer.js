@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
  
-const sendEmail = (email,newPassword) => {
+const sendEmail = (email,link) => {
 
 let mailTransporter = nodemailer.createTransport({
     service: 'gmail',
@@ -13,8 +13,8 @@ let mailTransporter = nodemailer.createTransport({
 let mailDetails = {
     from: process.env.EMAIL,
     to: email,
-    subject: 'Your New Password',
-    html: `<h1>Welcome</h1><p>${newPassword}</p>`
+    subject: 'Your One Time reset password link',
+    html: `<h1>Welcome</h1><p>${link}</p>`
 };
  
 mailTransporter.sendMail(mailDetails, function(err, data) {
@@ -25,7 +25,6 @@ mailTransporter.sendMail(mailDetails, function(err, data) {
         console.log('Email sent successfully');
     }
 });
-
 }
 
 module.exports = sendEmail
