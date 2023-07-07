@@ -20,7 +20,7 @@ const registerUser = async (req, res) => {
 
         const result = await User.create({ name:name, email:email, password:hashedPassword })
 
-        const token = jwt.sign({email:result.email,id:result._id},'test',{expiresIn:"1h"})
+        const token = jwt.sign({email:result.email,id:result._id},process.env.JWT_SECRET,{expiresIn:"1h"})
         
         res.status(200).json({message:"Registered Successfully", result:result,token})
 
@@ -34,6 +34,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password} = req.body
 
+  console.log(email)
   try{
     const existingUser = await User.findOne({email})
 
@@ -41,9 +42,9 @@ const loginUser = async (req, res) => {
 
     const isPasswordCorrect = await bcrypt.compare(password,existingUser.password)
 
-    if(!isPasswordCorrect) return res.status(400).json({message:"Invalid Credentials"})
+    if(!isPasswordCorrect) return res.status(400).json({message:"Email or Password is incorrect."})
 
-    const token = jwt.sign({email:existingUser.email,id:existingUser._id},'test',{expiresIn:"1h"})
+    const token = jwt.sign({email:existingUser.email,id:existingUser._id},process.env.JWT_SECRET,{expiresIn:"1h"})
 
     res.status(200).json({message:"Login Successfully", result:existingUser,token})
 
